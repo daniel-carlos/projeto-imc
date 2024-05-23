@@ -44,7 +44,7 @@ void ShowUser(struct User user)
 }
 #pragma endregion
 
-#pragma region STUCK
+#pragma region STACK
 struct Nodo
 {
     User dado;
