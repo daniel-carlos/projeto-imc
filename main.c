@@ -135,18 +135,24 @@ int main()
     printf(COLOR_RESET "\n\n\n");
 
     struct User user01;
-    strcpy(user01.name, "Daniel");
+    strcpy(user01.name, "1 Daniel");
     user01.height = 170;
     user01.weight = 85;
 
     struct User user02;
-    strcpy(user02.name, "Sansão");
+    strcpy(user02.name, "2 Sansão");
     user02.height = 192;
     user02.weight = 126.2;
+
+    struct User user03;
+    strcpy(user03.name, "3 Larissa");
+    user03.height = 162;
+    user03.weight = 80;
 
     Pilha *pilha = criarPilha();
     empilhar(pilha, &user01);
     empilhar(pilha, &user02);
+    empilhar(pilha, &user03);
 
     imprimirPilha(pilha);
     printf(COLOR_RESET "\n\n");
