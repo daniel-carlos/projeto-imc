@@ -11,6 +11,14 @@ struct User
     int height;   // in centimeters
 };
 typedef struct User User;
+
+void instancia(User *user, char *nome, int height, float weight)
+{
+    strcpy(user->name, nome);
+    user->height = height;
+    user->weight = weight;
+}
+
 #pragma endregion
 
 #pragma region GLOBAL_FUNCTIONS
@@ -52,159 +60,74 @@ struct Nodo
 };
 typedef struct Nodo nodo;
 
-void instancia(User *, char *, int, float);
-void iniciar(nodo *);
-void inserirInicio(nodo *, User *);
-void excluirInicio(nodo *);
-void inserirFinal(nodo *, User *);
-void imprimir(nodo *);
-void liberar(nodo *);
-
-void instancia(User *User, char *name, int height, float weight)
+typedef struct Pilha
 {
-    strcpy(User->name, name);
-    User->height = height;
-    User->weight = weight;
+    nodo *topo;
+} Pilha;
+
+Pilha *criarPilha()
+{
+    Pilha *novaPilha = (Pilha *)malloc(sizeof(Pilha));
+    novaPilha->topo = NULL;
+    return novaPilha;
 }
 
-void iniciar(nodo *L) { L->prox = NULL; }
-
-void inserirInicio(nodo *L, User *dado)
+void empilhar(Pilha *pilha, User *dado)
 {
     nodo *novo = (nodo *)malloc(sizeof(nodo));
-    strcpy(novo->dado.name, dado->name);
-    novo->dado.height = dado->height;
-    novo->dado.weight = dado->weight;
-    novo->prox = L->prox;
-    L->prox = novo;
+    instancia(&(novo->dado), dado->name, dado->height, dado->weight);
+    novo->prox = pilha->topo;
+    pilha->topo = novo;
 }
 
-void inserirmeio(nodo *L, User *dado, char *User)
+User *desempilhar(Pilha *pilha)
 {
-    nodo *novo = (nodo *)malloc(sizeof(nodo));
-    strcpy(novo->dado.name, dado->name);
-    novo->dado.height = dado->height;
-    novo->dado.weight = dado->weight;
-
-    if (estaVazia(L))
-        L->prox = novo;
-    else
+    if (pilhaVazia(pilha))
     {
-        nodo *tmp = NULL;
-        nodo *no = L->prox;
-        while (no != NULL)
-        {
-            if (strcmp(no->dado.name, User) == 0)
-            {
-                tmp = no->prox;
-                no->prox = novo;
-                novo->prox = tmp;
-            }
-
-            no = no->prox;
-        }
+        return NULL;
     }
+
+    nodo *topo = pilha->topo;
+    User *dado = &(topo->dado);
+    pilha->topo = topo->prox;
+    free(topo);
+    return dado;
 }
 
-void inserirFinal(nodo *L, User *dado)
+void imprimirPilha(Pilha *pilha)
 {
-    nodo *novo = (nodo *)malloc(sizeof(nodo));
-    strcpy(novo->dado.name, dado->name);
-    novo->dado.height = dado->height;
-    novo->dado.weight = dado->weight;
-    if (estaVazia(L))
+    if (pilhaVazia(pilha))
     {
-        L->prox = novo;
-    }
-    else
-    {
-        nodo *no = L->prox;
-        while (no->prox != NULL)
-            no = no->prox;
-        novo->prox = no->prox;
-        no->prox = novo;
-    }
-}
-
-void imprimir(nodo *L)
-{
-    if (estaVazia(L))
-    {
-        printf("\nLista Vazia\n");
+        printf("\nPilha Vazia\n");
         return;
     }
-    nodo *no = L->prox;
+
+    nodo *no = pilha->topo;
     while (no != NULL)
     {
-        printf("%d \t%s \t%.2f\n", no->dado.height, no->dado.name, no->dado.weight);
+        ShowUser(no->dado);
         no = no->prox;
     }
     printf("\n\n");
 }
 
-void liberar(nodo *L)
+void liberarPilha(Pilha *pilha)
 {
-    nodo *proximo;
-    nodo *atual;
-    atual = L;
-    while (atual->prox != NULL)
+    nodo *atual, *anterior;
+    atual = pilha->topo;
+    while (atual != NULL)
     {
-        proximo = atual->prox;
-        atual->prox = NULL;
-        free(atual);
-        atual = proximo;
+        anterior = atual;
+        atual = atual->prox;
+        free(anterior);
     }
+    free(pilha);
 }
 
-int estaVazia(nodo *L)
+int pilhaVazia(Pilha *pilha)
 {
-    if (L->prox == NULL)
-        return 1;
-    else
-        return 0;
+    return pilha->topo == NULL;
 }
-
-void excluirMeio(nodo *L, char *User)
-{
-    nodo *noAnterior = L;
-    nodo *noAtual = L->prox;
-    while (noAtual != NULL)
-    {
-        if (strcmp(noAtual->dado.name, User) == 0)
-        {
-            noAnterior->prox = noAtual->prox;
-            free(noAtual);
-            return;
-        }
-        noAnterior = noAtual;
-        noAtual = noAtual->prox;
-    }
-}
-
-void excluirInicio(nodo *L)
-{
-    if (estaVazia(L))
-    {
-        printf("\nLista Vazia\n");
-        return;
-    }
-    nodo *noPrimeiro = L->prox;
-    L->prox = noPrimeiro->prox;
-    free(noPrimeiro);
-}
-void excluirFinal(nodo *L)
-{
-    nodo *noAnterior = L;
-    nodo *noAtual = L->prox;
-    while (noAtual->prox != NULL)
-    {
-        noAnterior = noAtual;
-        noAtual = noAtual->prox;
-    }
-    noAnterior->prox = NULL;
-    free(noAtual);
-}
-
 #pragma endregion
 
 int main()
@@ -221,8 +144,10 @@ int main()
     user02.height = 192;
     user02.weight = 126.2;
 
-    ShowUser(user01);
-    ShowUser(user02);
+    Pilha *pilha = criarPilha();
+    empilhar(pilha, &user01);
+    empilhar(pilha, &user02);
 
+    imprimirPilha(pilha);
     printf(COLOR_RESET "\n\n");
 }
